@@ -75,7 +75,7 @@ return [
                        )
                       ),
             'database' => env('POSTGRES_DB',
-                            env('CI_ENVIRONMENT_SLUG',
+                            env('GITLAB_ENVIRONMENT_NAME',
                               env('DB_DATABASE', 'forge')
                             )
                           ),
