@@ -52,6 +52,12 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover"
+        ],
+        "test": [
+            "touch .env",
+            "@php artisan key:generate",
+            "@php artisan jwt:secret",
+            "phpunit"
         ]
     },
     "config": {
