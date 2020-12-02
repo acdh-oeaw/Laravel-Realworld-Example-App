@@ -5,4 +5,5 @@ then echo APP_KEY= > .env
   php artisan key:generate
   php artisan jwt:secret
 fi
+php artisan migrate
 exec heroku-php-apache2 public

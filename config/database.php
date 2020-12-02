@@ -64,11 +64,27 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'host' => env('POSTGRES_HOST', '127.0.0.1'),
-            'port' => env('POSTGRES_PORT', '5432'),
-            'database' => env('POSTGRES_DB', 'forge'),
-            'username' => env('POSTGRES_USER', 'forge'),
-            'password' => env('POSTGRES_PASSWORD', ''),
+            'host' => env('POSTGRES_HOST',
+                        env('PRODUCTION_POSTGRESQL_SERVICE_HOST',
+                          env('DB_HOST', '127.0.0.1')
+                        )
+                      ),
+            'port' => env('POSTGRES_PORT',
+                       env('PRODUCTION_POSTGRESQL_SERVICE_PORT',
+                         env('DB_PORT',  '5432')
+                       )
+                      ),
+            'database' => env('POSTGRES_DB',
+                            env('CI_ENVIRONMENT_SLUG',
+                              env('DB_DATABASE', 'forge')
+                            )
+                          ),
+            'username' => env('POSTGRES_USER',
+                           env('DB_USERNAME', 'user')
+                          ),
+            'password' => env('POSTGRES_PASSWORD',
+                            env('DB_PASSWORD', 'testing-password')
+                          ),
             'charset' => 'utf8',
             'prefix' => '',
             'schema' => 'public',
