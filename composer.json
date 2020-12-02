@@ -58,6 +58,9 @@
             "@php artisan key:generate",
             "@php artisan jwt:secret",
             "phpunit"
+        ],
+        "compile": [
+            "echo cd $APP_PATH > .profile.d/001-cd-app.sh"
         ]
     },
     "config": {
