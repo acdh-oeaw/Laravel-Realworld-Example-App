@@ -43,5 +43,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            acdhch/${{ env.image_tagged }}
             ghcr.io/acdh-oeaw/${{ env.image_tagged }}
+# acdhch/${{ env.image_tagged }}            
