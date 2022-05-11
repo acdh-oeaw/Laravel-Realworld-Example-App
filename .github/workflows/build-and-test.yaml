@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+# CNB are not multi-arch ready as of May 2022 so this is not needed
 #      - name: Set up QEMU
 #        uses: docker/setup-qemu-action@v1
 #      - name: Set up Docker Buildx
@@ -39,9 +40,33 @@ jobs:
         with:
           context: .
           build-args: |
-            default_port=5000
+            default_port=${{ env.default_port }}
+            source_image=${{ env.source_image }}
           platforms: linux/amd64
           push: true
           tags: |
             ghcr.io/acdh-oeaw/${{ env.image_tagged }}
-# acdhch/${{ env.image_tagged }}            
+# acdhch/${{ env.image_tagged }}
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: Set up tests herokuish and heroku buildpack
+        run: |
+          cat <<EOF > Dockerfile  
+          FROM gliderlabs/herokuish
+          COPY . /tmp/app
+          ENV BUILDPACK_URL=${{ env.BUILDPACK_URL }}
+          ENV USER=herokuishuser
+          EOF
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          tags: |
+            ${{ env.DOCKER_TAG }}:${{ github.ref_name }}-test
+      - name: Run tests using herokuish and heroku buildpack
+          docker run --rm -t ${{ env.DOCKER_TAG }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
