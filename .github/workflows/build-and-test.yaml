@@ -15,6 +15,12 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build using heroku/buildpacks:20 CNB
         uses: dfreilich/pack-action@v2.0.0
         with:
@@ -23,31 +29,18 @@ jobs:
         run: |
           cat >> Dockerfile <<EOF
           ARG source_image
-          FROM ${{ env.source_image }}
+          FROM ${source_image}
           ARG default_port
           ENV PORT=${default_port}
           EXPOSE ${default_port}
           EOF
-          docker build \
-            --build-arg source_image=${{ env.source_image }} \
-            --build-arg default_port=5000 \
-            --tag "${{ env.image_tagged }}"
-      - name: Login to DockerHub
-        uses: docker/login-action@v1 
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          build-args: |
+            default_port=5000
+          platforms: linux/amd64
           push: true
           tags: |
             acdhch/${{ env.image_tagged }}
