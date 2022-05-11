@@ -67,7 +67,7 @@ jobs:
           platforms: linux/amd64
           push: false
           tags: |
-            ${{ env.DOCKER_TAG }}:${{ github.ref_name }}-test
+            ${{ env.image_tagged }}:${{ github.ref_name }}-test
       - name: Run tests using herokuish and heroku buildpack
         run: |
-          docker run --rm -t ghcr.io/acdh-oeaw/${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
+          docker run --rm -t ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
