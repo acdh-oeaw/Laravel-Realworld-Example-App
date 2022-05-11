@@ -49,9 +49,14 @@ jobs:
 # acdhch/${{ env.image_tagged }}
   test:
     runs-on: ubuntu-20.04
+    env:
+      BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-php
     steps:
       - name: checkout
         uses: actions/checkout@v3
+# this is an example of detection not working (only in herokuish)
+# Warning: Multiple default buildpacks reported the ability to handle this app. The first buildpack in the list below will be used.
+# nodejs, php
       - name: Set up tests herokuish and heroku buildpack
         run: |
           cat <<EOF > Dockerfile  
