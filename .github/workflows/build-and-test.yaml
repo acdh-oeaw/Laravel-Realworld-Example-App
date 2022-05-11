@@ -69,4 +69,5 @@ jobs:
           tags: |
             ${{ env.DOCKER_TAG }}:${{ github.ref_name }}-test
       - name: Run tests using herokuish and heroku buildpack
+        run: |
           docker run --rm -t ${{ env.DOCKER_TAG }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
