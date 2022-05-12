@@ -80,15 +80,18 @@ jobs:
       - name: Set up a test database container
         run: |
            docker run --rm -d -p 5432:5432 -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD postgres:9.6.16           
-           (run=1
-            psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
-            while [ $? == 2 ]
-            do sleep 1
-               run=$(($run+1))
-               if [ $run -gt 59 ]; then break; fi
-               echo -n .
-               psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
-            done)           
+           cat > psql-test.sh <<EOF
+           run=1
+           psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
+           while [ $? == 2 ]
+           do sleep 1
+              run=$(($run+1))
+              if [ $run -gt 59 ]; then break; fi
+              echo -n .
+              psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
+           done
+           EOF
+           bash psql-test.sh        
       - name: Run tests using herokuish and heroku buildpack
         run: |
           docker run --rm -t -e DATABASE_URL=$DATABASE_URL ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
