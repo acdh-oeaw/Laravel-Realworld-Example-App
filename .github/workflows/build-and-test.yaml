@@ -9,7 +9,7 @@ env:
   APP_ROOT: "/"
   SERVICE_ID: "99999"
   PUBLIC_URL: https://laravel-todo-example.acdh-cluster.arz.oeaw.ac.at
-  POSTGRESQL_ENABLED: true
+  POSTGRES_ENABLED: true
 on:
   push: {}
 jobs:
@@ -21,7 +21,7 @@ jobs:
       APP_ROOT: ${{ env.APP_ROOT }}
       SERVICE_ID: ${{ env.SERVICE_ID }}
       PUBLIC_URL: ${{ env.PUBLIC_URL }}
-      POSTGRESQL_ENABLED: ${{ env.POSTGRESQL }}
+      POSTGRES_ENABLED: ${{ env.POSTGRES_ENABLED }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -142,4 +142,4 @@ jobs:
       APP_ROOT: ${{ needs.build_and_push_to_registry.outputs.APP_ROOT }}
       SERVICE_ID: ${{ needs.build_and_push_to_registry.outputs.SERVICE_ID }}
       PUBLIC_URL: ${{ needs.build_and_push_to_registry.outputs.PUBLIC_URL }}
-      POSTGRESCQL_ENBLED: ${{ needs.build_and_push_to_registry.outputs.POSTGRESCQL_ENABLED }}
+      POSTGRES_ENABLED: ${{ needs.build_and_push_to_registry.outputs.POSTGRES_ENABLED }}
