@@ -77,9 +77,13 @@ jobs:
           push: false
           tags: |
             ${{ env.image_tagged }}:${{ github.ref_name }}-test
+      - name: Create test services network
+        run: |
+          docker network create --internal test-services 
       - name: Set up a test database container
         run: |
-           docker run --rm --name postgres -d -p 5432:5432 -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD postgres:9.6.16           
+           # The following service is isolated from the internet
+           docker run -d --name postgres --network test-services -p 5432:5432 -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD postgres:9.6.16
            cat > psql-test.sh <<EOF
            run=1
            psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
@@ -91,7 +95,18 @@ jobs:
               psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
            done
            EOF
-           bash psql-test.sh        
-      - name: Run tests using herokuish and heroku buildpack
+           bash psql-test.sh
+# If in doubt use the following method       
+#      - name: Run tests using herokuish and heroku buildpack
+# This is a bit more elaborate so the container has access to the internet via the host
+# and in addition to the test services network which is isolated from the internet
+#        run: |
+#          cid=$(docker create -t -e DATABASE_URL=$DATABASE_URL ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test)
+#          docker network connect test-services $cid
+#          docker start -i $cid
+# This is only for frameworks that really don't support DATABASE_URL. The next version of laravel for exmaple does.
+      - name: Run tests using herokuish and heroku buildpack (DB credentials in multiple variables)
         run: |
-          docker run --link postgres --rm -t -e DATABASE_URL=$DATABASE_URL ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
+          cid=$(docker create -t -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_HOST=postgres ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test)
+          docker network connect test-services $cid
+          docker start -i $cid
