@@ -1,0 +1,83 @@
+name: Deploy
+on:
+  workflow_call:  
+    inputs:
+      DOCKER_TAG:
+        required: true
+        type: string
+      APP_NAME:
+        required: true
+        type: string
+      APP_ROOT:
+        required: true
+        type: string
+      SERVICE_ID:
+        required: true
+        type: string
+      PUBLIC_URL:
+        required: true
+        type: string
+    secrets:
+      ACDH_KUBE_CONFIG:
+        description: 'The kubctl config file to access the ACDH kubernetes'
+        required: true
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [run]
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@v1
+      name: Checkout
+    - name: Kubernetes credentials
+      run: |
+        mkdir ${HOME}/.kube
+        echo ${{ secrets.ACDH_KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+        chmod 0600 ${HOME}/.kube/config
+        kubectl config set-context --current --namespace=${{ inputs.APP_NAME }}
+        kubectl get pod
+    - name: Create auto-deploy-app-values.yaml
+      run: |
+        cat > auto-deploy-app-values.yaml <<EOF
+        replicaCount: 1
+        image:
+          repository: ${{ inputs.DOCKER_TAG }}/${{ github.ref_name }}
+          tag: ${{ github.sha }}
+          pullPolicy: Always
+        extraLabels:
+          "ID": "${{ inputs.SERVICE_ID }}"
+        github:
+          app: ${{ inputs.APP_NAME }}
+          envURL: ${{ github.repositoryUrl }}
+        service:
+          enabled: true
+          name: ${{ inputs.APP_NAME }}
+          url: ${{ inputs.PUBLIC_URL }}
+          additionalHosts:
+            - ${{ inputs.APP_NAME }}.acdh-cluster.arz.oeaw.ac.at
+          type: ClusterIP
+          externalPort: 5000
+          internalPort: 5000
+        ingress:
+          enabled: true
+          path: "/"
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+            nginx.ingress.kubernetes.io/app-root: ${{ inputs.APP_ROOT }}/
+        livenessProbe:
+          path: "${{ inputs.APP_ROOT }}"
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+          scheme: "HTTP"
+          probeType: "httpGet"
+        readinessProbe:
+          path: "${{ inputs.APP_ROOT }}"
+          initialDelaySeconds: 5
+          timeoutSeconds: 3
+          scheme: "HTTP"
+          probeType: "httpGet"
+        EOF
+    - name: Deploy using helm and the local helm chart
+      run: |
+        helm upgrade ${{ inputs.APP_NAME }} .github/auto-deploy-app --values auto-deploy-app-values.yaml --install --atomic
