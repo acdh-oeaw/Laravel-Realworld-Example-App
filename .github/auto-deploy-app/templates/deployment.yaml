@@ -96,7 +96,7 @@ spec:
 {{ toYaml .Values.lifecycle | indent 10 }}
 {{- end }}
         ports:
-        - name: "{{ .Values.service.name }}"
+        - name: "{{ .Values.service.name | trunc 15 }}"
           containerPort: {{ .Values.service.internalPort }}
         livenessProbe:
 {{- if eq .Values.livenessProbe.probeType "httpGet" }}
