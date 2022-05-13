@@ -14,6 +14,12 @@ on:
 jobs:
   build_and_push_to_registry:
     runs-on: ubuntu-20.04
+    outputs:
+      DOCKER_TAG: ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}:${{ github.sha }}
+      APP_NAME: ${{ env.APP_NAME }}
+      APP_ROOT: ${{ env.APP_ROOT }}
+      SERVICE_ID: ${{ env.SERVICE_ID }}
+      PUBLIC_URL: ${{ env.PUBLIC_URL }}      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -123,8 +129,8 @@ jobs:
     secrets:
       ACDH_KUBE_CONFIG: ${{ secrets.ACDH_KUBE_CONFIG }}
     with:
-      DOCKER_TAG: ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}
-      APP_NAME: ${{ env.APP_NAME }}
-      APP_ROOT: ${{ env.APP_ROOT }}
-      SERVICE_ID: ${{ env.SERVICE_ID }}
-      PUBLIC_URL: ${{ env.PUBLIC_URL }}
+      DOCKER_TAG: ${{ steps.build_and_push_to_registry.outputs.DOCKER_TAG }}
+      APP_NAME: ${{ steps.build_and_push_to_registry.outputs.APP_NAME }}
+      APP_ROOT: ${{ steps.build_and_push_to_registry.outputs.APP_ROOT }}
+      SERVICE_ID: ${{ steps.build_and_push_to_registry.outputs.SERVICE_ID }}
+      PUBLIC_URL: ${{ steps.build_and_push_to_registry.outputs.PUBLIC_URL }}
