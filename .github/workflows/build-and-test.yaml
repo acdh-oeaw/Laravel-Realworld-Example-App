@@ -124,13 +124,13 @@ jobs:
           docker network connect test-services $cid
           docker start -i $cid
   deploy:
-    needs: [build, test]
+    needs: [build_and_push_to_registry, test]
     uses: ./.github/workflows/deploy.yml
     secrets:
       ACDH_KUBE_CONFIG: ${{ secrets.ACDH_KUBE_CONFIG }}
     with:
-      DOCKER_TAG: ${{ steps.build_and_push_to_registry.outputs.DOCKER_TAG }}
-      APP_NAME: ${{ steps.build_and_push_to_registry.outputs.APP_NAME }}
-      APP_ROOT: ${{ steps.build_and_push_to_registry.outputs.APP_ROOT }}
-      SERVICE_ID: ${{ steps.build_and_push_to_registry.outputs.SERVICE_ID }}
-      PUBLIC_URL: ${{ steps.build_and_push_to_registry.outputs.PUBLIC_URL }}
+      DOCKER_TAG: ${{ needs.build_and_push_to_registry.outputs.DOCKER_TAG }}
+      APP_NAME: ${{ needs.build_and_push_to_registry.outputs.APP_NAME }}
+      APP_ROOT: ${{ needs.build_and_push_to_registry.outputs.APP_ROOT }}
+      SERVICE_ID: ${{ needs.build_and_push_to_registry.outputs.SERVICE_ID }}
+      PUBLIC_URL: ${{ needs.build_and_push_to_registry.outputs.PUBLIC_URL }}
