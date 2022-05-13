@@ -142,4 +142,4 @@ jobs:
       APP_ROOT: ${{ needs.build_and_push_to_registry.outputs.APP_ROOT }}
       SERVICE_ID: ${{ needs.build_and_push_to_registry.outputs.SERVICE_ID }}
       PUBLIC_URL: ${{ needs.build_and_push_to_registry.outputs.PUBLIC_URL }}
-      POSTGRES_ENABLED: ${{ needs.build_and_push_to_registry.outputs.POSTGRES_ENABLED }}
+      POSTGRES_ENABLED: ${{ needs.build_and_push_to_registry.outputs.POSTGRES_ENABLED == 'true'}}
