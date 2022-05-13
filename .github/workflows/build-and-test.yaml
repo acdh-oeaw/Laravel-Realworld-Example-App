@@ -71,6 +71,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 # this is an example of detection not working (only in herokuish)
 # Warning: Multiple default buildpacks reported the ability to handle this app. The first buildpack in the list below will be used.
 # nodejs, php
