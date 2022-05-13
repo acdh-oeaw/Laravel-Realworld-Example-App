@@ -29,6 +29,10 @@ on:
         required: false
         type: string
         default: ''
+      POSTGRES_SIZE:
+        required: false
+        type: string
+        default: '1Gi'
     secrets:
       ACDH_KUBE_CONFIG:
         description: 'The kubctl config file to access the ACDH kubernetes'
@@ -109,6 +113,7 @@ jobs:
           --set postgresqlPassword="${{ secrets.POSTGRES_PASSWORD }}" \
           --set postgresqlDatabase="${{ secrets.POSTGRES_DB }}" \
           --set image.tag="${{ inputs.POSTGRES_VERSION }}" \
+          --set persistence.size="${{ inputs.POSTGRES_SIZE }}" \
           --namespace="${{ inputs.APP_NAME }}-${{ github.ref_name }}" \
           "${{ inputs.APP_NAME }}-postgres" \
           bitnami/postgresql
