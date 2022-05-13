@@ -87,9 +87,9 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          push: false
+          push: true
           tags: |
-            ${{ env.image_tagged }}/${{ github.ref_name }}:${{ github.ref_name }}-test
+            ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}:${{ github.sha }}-test
       - name: Create test services network
         run: |
           docker network create --internal test-services 
@@ -120,7 +120,7 @@ jobs:
 # This is only for frameworks that really don't support DATABASE_URL. The next version of laravel for exmaple does.
       - name: Run tests using herokuish and heroku buildpack (DB credentials in multiple variables)
         run: |
-          cid=$(docker create -t -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_HOST=postgres ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test)
+          cid=$(docker create -t -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD -e POSTGRES_HOST=postgres ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}:${{ github.sha }}-test /bin/herokuish buildpack test)
           docker network connect test-services $cid
           docker start -i $cid
   deploy:
