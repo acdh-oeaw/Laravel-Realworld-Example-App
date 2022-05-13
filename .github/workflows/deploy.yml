@@ -113,7 +113,7 @@ jobs:
         POSTGRES_DB=$(echo -n '${{ secrets.POSTGRES_DB }}' | base64 -w0)
         cat > secrets.yaml <<EOF
         apiVersion: v1
-        kind: secret
+        kind: Secret
         metadata:
           name: ${{ inputs.APP_NAME }}-${{ github.ref_name }}
         type: Opaque
