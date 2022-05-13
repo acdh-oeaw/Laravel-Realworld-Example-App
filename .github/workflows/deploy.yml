@@ -59,7 +59,7 @@ jobs:
         cat > auto-deploy-app-values.yaml <<EOF
         replicaCount: 1
         image:
-          repository: ${{ inputs.DOCKER_TAG }}/${{ github.ref_name }}
+          repository: ${{ inputs.DOCKER_TAG }}
           tag: ${{ github.sha }}
           pullPolicy: Always
         extraLabels:

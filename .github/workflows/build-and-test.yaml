@@ -16,7 +16,7 @@ jobs:
   build_and_push_to_registry:
     runs-on: ubuntu-20.04
     outputs:
-      DOCKER_TAG: ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}:${{ github.sha }}
+      DOCKER_TAG: ${{ env.registry_root }}${{ env.image_tagged }}/${{ github.ref_name }}
       APP_NAME: ${{ env.APP_NAME }}
       APP_ROOT: ${{ env.APP_ROOT }}
       SERVICE_ID: ${{ env.SERVICE_ID }}
