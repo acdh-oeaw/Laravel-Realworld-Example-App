@@ -136,6 +136,9 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     secrets:
       ACDH_KUBE_CONFIG: ${{ secrets.ACDH_KUBE_CONFIG }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
     with:
       DOCKER_TAG: ${{ needs.build_and_push_to_registry.outputs.DOCKER_TAG }}
       APP_NAME: ${{ needs.build_and_push_to_registry.outputs.APP_NAME }}
