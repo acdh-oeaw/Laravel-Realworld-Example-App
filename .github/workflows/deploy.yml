@@ -17,10 +17,27 @@ on:
       PUBLIC_URL:
         required: true
         type: string
+      POSTGRESQL_EMABLED:
+        required: false
+        type: boolean
+        default: false
+      POSTGRES_VERSION:
+        required: false
+        type: string
+        default: 9.6.16
     secrets:
       ACDH_KUBE_CONFIG:
         description: 'The kubctl config file to access the ACDH kubernetes'
         required: true
+      POSTGRES_USER:
+        description: 'User for the deployed PostgreSQL database'
+        required: false
+      POSTGRES_DB: 
+        description: 'Database name for the deployed PostgreSQL database'
+        required: false
+      POSTGRES_PASSWORD: 
+        description: 'Password name for the deployed PostgreSQL database'
+        required: false      
   workflow_dispatch: {}
   repository_dispatch:
     types: [run]
@@ -55,7 +72,7 @@ jobs:
           name: ${{ inputs.APP_NAME }}
           url: ${{ inputs.PUBLIC_URL }}
           additionalHosts:
-            - ${{ inputs.APP_NAME }}.acdh-cluster.arz.oeaw.ac.at
+            - ${{ inputs.APP_NAME }}-${{ github.ref_name }}.acdh-cluster.arz.oeaw.ac.at
           type: ClusterIP
           externalPort: 5000
           internalPort: 5000
@@ -64,7 +81,7 @@ jobs:
           path: "/"
           annotations:
             kubernetes.io/ingress.class: "nginx"
-            nginx.ingress.kubernetes.io/app-root: ${{ inputs.APP_ROOT }}/
+            nginx.ingress.kubernetes.io/app-root: ${{ inputs.APP_ROOT }}
         livenessProbe:
           path: "${{ inputs.APP_ROOT }}"
           initialDelaySeconds: 15
@@ -78,6 +95,38 @@ jobs:
           scheme: "HTTP"
           probeType: "httpGet"
         EOF
+    - if: inputs.POSTGRESQL_ENABLED
+      name: Deploy PostgreSQL
+      run: |
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm upgrade --install --atomic --wait --version 8.2.1 \
+          --set fullnameOverride="${{ inputs.APP_NAME }}-postgres" \
+          --set postgresqlUsername="${{ secrets.POSTGRES_USER }}" \
+          --set postgresqlPassword="${{ secrets.POSTGRES_PASSWORD }}" \
+          --set postgresqlDatabase="${{ secrets.POSTGRES_DB }}" \
+          --set image.tag="${{ inputs.POSTGRES_VERSION }}" \
+          --namespace="${{ inputs.APP_NAME }}-${{ github.ref_name }}" \
+          "${{ inputs.APP_NAME }}-postgres" \
+          bitnami/postgresql
+        POSTGRES_USER=$(echo -n '${{ secrets.POSTGRES_USER }}' | base64 -w0)
+        POSTGRES_PASSWORD=$(echo -n '${{ secrets.POSTGRES_PASSWORD }}' | base64 -w0)
+        POSTGRES_DB=$(echo -n '${{ secrets.POSTGRES_DB }}' | base64 -w0)
+        cat > secrets.yaml <<EOF
+        apiVersion: v1
+        kind: secret
+        metadata:
+          name: ${{ inputs.APP_NAME }}-${{ github.ref_name }}
+        type: Opaque
+        data:
+          POSTGRES_USER: $POSTGRES_USER
+          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+          POSTGRES_DB: $POSTGRES_DB
+        EOF
+        kubectl replace -f secrets.yaml -n "${{ inputs.APP_NAME }}-${{ github.ref_name }}" --force
     - name: Deploy using helm and the local helm chart
       run: |
-        helm upgrade ${{ inputs.APP_NAME }} .github/auto-deploy-app --values auto-deploy-app-values.yaml --install --atomic
+        helm upgrade ${{ inputs.APP_NAME }} \
+          --values auto-deploy-app-values.yaml --install --atomic --wait \
+          --set application.database_url="postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@${{ inputs.APP_NAME }}-postgres:5432/${{ secrets.POSTGRES_DB }}" \
+          --set application.secretName="${{ inputs.APP_NAME }}-${{ github.ref_name }}" \
+          .github/auto-deploy-app

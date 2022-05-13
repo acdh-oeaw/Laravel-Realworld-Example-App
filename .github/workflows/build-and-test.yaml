@@ -4,11 +4,12 @@ env:
   registry_root: ghcr.io/acdh-oeaw/
   default_port: 5000
   source_image: tmp-cnb-image
-  APP_NAME: github-laravel-realworld-example-app
+  APP_NAME: laravel-realworld-example-app-github
 # This together with the branch name is also used as the namespace to deploy to
   APP_ROOT: "/"
   SERVICE_ID: "99999"
   PUBLIC_URL: https://laravel-todo-example.acdh-cluster.arz.oeaw.ac.at
+  POSTGRESQL_ENABLED: true
 on:
   push: {}
 jobs:
@@ -19,7 +20,8 @@ jobs:
       APP_NAME: ${{ env.APP_NAME }}
       APP_ROOT: ${{ env.APP_ROOT }}
       SERVICE_ID: ${{ env.SERVICE_ID }}
-      PUBLIC_URL: ${{ env.PUBLIC_URL }}      
+      PUBLIC_URL: ${{ env.PUBLIC_URL }}
+      POSTGRESQL_ENABLED: ${{ env.POSTGRESQL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -140,3 +142,4 @@ jobs:
       APP_ROOT: ${{ needs.build_and_push_to_registry.outputs.APP_ROOT }}
       SERVICE_ID: ${{ needs.build_and_push_to_registry.outputs.SERVICE_ID }}
       PUBLIC_URL: ${{ needs.build_and_push_to_registry.outputs.PUBLIC_URL }}
+      POSTGRESCQL_ENBLED: ${{ needs.build_and_push_to_registry.outputs.POSTGRESCQL_ENABLED }}
