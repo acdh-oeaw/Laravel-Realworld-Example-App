@@ -54,7 +54,7 @@ jobs:
       PGPASSWORD: testing-password
       POSTGRES_USER: user
       POSTGRES_DB: test
-      DATABASE_URL: "postgres://user:testing-password@127.0.0.1:5432/test"
+      DATABASE_URL: "postgres://user:testing-password@postgres:5432/test"
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -79,7 +79,7 @@ jobs:
             ${{ env.image_tagged }}:${{ github.ref_name }}-test
       - name: Set up a test database container
         run: |
-           docker run --rm -d -p 5432:5432 -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD postgres:9.6.16           
+           docker run --rm --name postgres -d -p 5432:5432 -e POSTGRES_DB=$POSTGRES_DB -e POSTGRES_USER=$POSTGRES_USER -e POSTGRES_PASSWORD=$PGPASSWORD postgres:9.6.16           
            cat > psql-test.sh <<EOF
            run=1
            psql -h 127.0.0.1 -U user -d test -c \\q 2>/dev/null
@@ -94,4 +94,4 @@ jobs:
            bash psql-test.sh        
       - name: Run tests using herokuish and heroku buildpack
         run: |
-          docker run --rm -t -e DATABASE_URL=$DATABASE_URL ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
+          docker run --link postgres --rm -t -e DATABASE_URL=$DATABASE_URL ${{ env.image_tagged }}:${{ github.ref_name }}-test /bin/herokuish buildpack test    
