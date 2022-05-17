@@ -20,7 +20,7 @@ jobs:
       - run: "/bin/true"      
   _1:
     needs: [setup-env]
-    uses: ./.github/workflows/build-cnb-and-push-to-registry.yaml    
+    uses: acdh-oeaw/gl-autodevops-minimal-port/.github/workflows/build-cnb-and-push-to-registry.yaml@main  
     with:
       registry_root: ${{ needs.setup-env.outputs.registry_root }}
       image_tagged: ${{ needs.setup-env.outputs.image_tagged }}
@@ -29,7 +29,7 @@ jobs:
   _2:
     needs: [setup-env]
 # This is only for frameworks that really don't support DATABASE_URL. The next version of laravel for exmaple does.
-    uses: ./.github/workflows/herokuish-tests-multi-var.yaml    
+    uses: acdh-oeaw/gl-autodevops-minimal-port/.github/workflows/herokuish-tests-multi-var.yaml@main
     with:
       registry_root: ${{ needs.setup-env.outputs.registry_root }}
       image_tagged: ${{ needs.setup-env.outputs.image_tagged }}
@@ -41,7 +41,7 @@ jobs:
       BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-php
   _3:
     needs: [setup-env, _1, _2]
-    uses: ./.github/workflows/deploy.yml
+    uses: acdh-oeaw/gl-autodevops-minimal-port/.github/workflows/deploy.yml@main
     secrets:
       ACDH_KUBE_CONFIG: ${{ secrets.ACDH_KUBE_CONFIG }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
