@@ -1,4 +1,4 @@
-name: Deploy
+name: Build CNB and push to registry
 on:
   workflow_call:  
     inputs:
