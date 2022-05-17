@@ -14,7 +14,7 @@ on:
   push: {}
 jobs:
   setup-env:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     outputs: 
       image_tagged: laravel-realworld-example-app
       registry_root: ghcr.io/acdh-oeaw/
