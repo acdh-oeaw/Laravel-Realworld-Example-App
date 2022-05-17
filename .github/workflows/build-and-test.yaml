@@ -26,9 +26,8 @@ jobs:
       SERVICE_ID: "99999"
       PUBLIC_URL: https://laravel-todo-example.acdh-cluster.arz.oeaw.ac.at
       POSTGRES_ENABLED: "true"
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v3      
+    steps:
+      - run: "/bin/true"      
   _1:
     needs: [setup-env]
     uses: ./.github/workflows/build-cnb-and-push-to-registry.yaml    
