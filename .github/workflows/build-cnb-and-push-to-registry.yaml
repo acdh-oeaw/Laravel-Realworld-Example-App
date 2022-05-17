@@ -19,7 +19,7 @@ on:
     types: [run]
 jobs:
   build_and_push_to_registry:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
